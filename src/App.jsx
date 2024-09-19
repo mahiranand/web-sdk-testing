@@ -1,8 +1,8 @@
 // import {CustomerGluComponent} from "@customerglu/react-web-sdk";
 import "./styles.css";
-import { CustomerGluComponent } from "@customerglu/react-web-sdk";
+// import { CustomerGluComponent } from "@customerglu/react-web-sdk";
 
-// import CustomerGluComponent from "./component/CustomerGluComponent";
+import CustomerGluComponent from "./component/CustomerGluComponent";
 import { Route, Routes } from "react-router-dom";
 import Cgtest from "./component/Cgtest";
 import Error from "./component/Error";
