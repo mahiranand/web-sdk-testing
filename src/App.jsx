@@ -42,7 +42,7 @@ export default function App() {
   }, []);
 
   if (!token || !userId) {
-    return <div>Loading...</div>; // Display a loading message while fetching data
+    return <></>; // Display a loading message while fetching data
   }
 
   return (
