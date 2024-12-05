@@ -1,53 +1,50 @@
-// import {CustomerGluComponent} from "@customerglu/react-web-sdk";
+import { useEffect, useState } from "react";
 import "./styles.css";
 import { CustomerGluComponent } from "@customerglu/react-web-sdk";
-
-// import CustomerGluComponent from "./component/CustomerGluComponent";
-import { Route, Routes } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import Cgtest from "./component/Cgtest";
-import Error from "./component/Error";
+import { v4 as uuidv4 } from "uuid"; // Import UUID generator
 import { Box } from "@mui/material";
 
-// function CustomerGluWrapper({ tagIds }) {
-//   const navigate = useNavigate();
-
-//   const handleNavigate = () => {
-//     navigate("/test"); // Navigate to the "test" page
-//   };
-
-//   return (
-//     <Box
-//       sx={{
-//         display: "flex",
-//         justifyContent: "center",
-//         flexDirection: "column",
-//       }}
-//     >
-//       <CustomerGluComponent
-//         gluToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJnbHV0ZXN0LTlhNDM2YzJmLTk2ZTYtNDI1Ni05ZDU4LTBlODQyNWM2OWMyNSIsImdsdUlkIjoiNjIzMGFlMzgtNDY3Yy00NmExLWFmYTMtOGYyMjliYzFlYTJkIiwiY2xpZW50IjoiMzVkZWFjZTgtYzA0Zi00M2MzLWEwMGItOWMwNmVhYWU3YWNiIiwiZGV2aWNlSWQiOiJnbHV0ZXN0LTlhNDM2YzJmLTk2ZTYtNDI1Ni05ZDU4LTBlODQyNWM2OWMyNV9kZWZhdWx0IiwiZGV2aWNlVHlwZSI6ImRlZmF1bHQiLCJpc0xvZ2dlZEluIjp0cnVlLCJ2ZXJzaW9uIjoidjIiLCJ0aW1lWm9uZSI6IkFzaWEvS29sa2F0YSIsImlzUmV3YXJkSW5pdEVuYWJsZWQiOnRydWUsImlhdCI6MTczMzE1MjIzNywiZXhwIjoxNzY0Njg4MjM3fQ.KEoe0VVVgvPeHky6xy3Md0d-PCizYzcVbhYAgqLu3po"
-//         userId="glutest-9a436c2f-96e6-4256-9d58-0e8425c69c25"
-//         region="us"
-//       />
-//       // mapping the tag ids here. "embedId" and "embedIdv3"
-//       {tagIds.map((tagId) => (
-//         <Box
-//           key={tagId}
-//           id={tagId}
-//           // sx={{
-//           //   maxWidth: 1232,
-//           //   width: "100%",
-//           // }}
-//         />
-//       ))}
-//       <button onClick={handleNavigate} style={{ marginTop: "20px" }}>
-//         Go to Test Page
-//       </button>
-//     </Box>
-//   );
-// }
+// API call to fetch token based on the generated UUID
+async function fetchToken(userId) {
+  const response = await fetch('https://api-us.customerglu.com/user/v1/user/sdk?token=true', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      userId: userId,
+      writeKey: "10666d4bf2ed9519c6ac245e6943ec2717afa042",
+    }),
+  });
+  
+  const data = await response.json();
+  return data.success ? data.data.token : null;
+}
 
 export default function App() {
+  const [token, setToken] = useState(null);
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    // Generate a random UUID for userId
+    const newUserId = `glutest-${uuidv4()}`;
+    setUserId(newUserId);
+
+    // Fetch the token using the generated userId
+    const getToken = async () => {
+      const fetchedToken = await fetchToken(newUserId);
+      if (fetchedToken) {
+        setToken(fetchedToken); // Store the fetched token
+      }
+    };
+    
+    getToken(); // Call the function to fetch the token
+  }, []);
+
+  if (!token || !userId) {
+    return <div>Loading...</div>; // Display a loading message while fetching data
+  }
+
   return (
     <div className="App">
       <div
@@ -60,22 +57,11 @@ export default function App() {
         }}
       >
         <CustomerGluComponent
-          gluToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJnbHV0ZXN0LTlhNDM2YzJmLTk2ZTYtNDI1Ni05ZDU4LTBlODQyNWM2OWMyNSIsImdsdUlkIjoiNjIzMGFlMzgtNDY3Yy00NmExLWFmYTMtOGYyMjliYzFlYTJkIiwiY2xpZW50IjoiMzVkZWFjZTgtYzA0Zi00M2MzLWEwMGItOWMwNmVhYWU3YWNiIiwiZGV2aWNlSWQiOiJnbHV0ZXN0LTlhNDM2YzJmLTk2ZTYtNDI1Ni05ZDU4LTBlODQyNWM2OWMyNV9kZWZhdWx0IiwiZGV2aWNlVHlwZSI6ImRlZmF1bHQiLCJpc0xvZ2dlZEluIjp0cnVlLCJ2ZXJzaW9uIjoidjIiLCJ0aW1lWm9uZSI6IkFzaWEvS29sa2F0YSIsImlzUmV3YXJkSW5pdEVuYWJsZWQiOnRydWUsImlhdCI6MTczMzE1MjIzNywiZXhwIjoxNzY0Njg4MjM3fQ.KEoe0VVVgvPeHky6xy3Md0d-PCizYzcVbhYAgqLu3po"
-          userId="glutest-9a436c2f-96e6-4256-9d58-0e8425c69c25"
+          gluToken={token} // Pass the fetched token
+          userId={userId}  // Pass the generated userId
           region="us"
-        >
-        </CustomerGluComponent>
+        />
       </div>
     </div>
-    // <>
-    //   <Routes>
-    //     <Route
-    //       path="/"
-    //       element={<CustomerGluWrapper tagIds={["embedId", "embedIdv4"]} />}
-    //     />
-    //     <Route path="/test" element={<Cgtest />} />
-    //     <Route path="*" element={<Error />} />
-    //   </Routes>
-    // </>
   );
 }
